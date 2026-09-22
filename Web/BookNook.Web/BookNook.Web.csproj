@@ -11,6 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -21,6 +25,7 @@
     <ProjectReference Include="..\..\Data\BookNook.Data.Models\BookNook.Data.Models.csproj" />
     <ProjectReference Include="..\..\Data\BookNook.Data\BookNook.Data.csproj" />
     <ProjectReference Include="..\..\Services\BookNook.Services.Data\BookNook.Services.Data.csproj" />
+    <ProjectReference Include="..\BookNook.Web.ViewModels\BookNook.Web.ViewModels.csproj" />
   </ItemGroup>
 
 </Project>
