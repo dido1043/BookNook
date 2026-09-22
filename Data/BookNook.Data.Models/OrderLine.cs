@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookNook.Data.Models
 {
-    public class OrderLine : BaseEntity
+    [PrimaryKey(nameof(OrderId), nameof(BookId))]
+    public class OrderLine
     {
         [Required]
         public int OrderId { get; set; }
