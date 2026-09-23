@@ -11,14 +11,14 @@ namespace BookNook.Data
         }
 
         public DbSet<Book> Books { get; set; } = null!;
-        public DbSet<Client> Clients { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderLine> OrderLines { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+            //Set table name to Clients instead of AspNetUsers
+            modelBuilder.Entity<Client>().ToTable("Clients");
             // Cannot delete a Client if they have Orders
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.Client)

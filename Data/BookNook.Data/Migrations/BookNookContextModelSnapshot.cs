@@ -94,7 +94,7 @@ namespace BookNook.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 7310L);
 
                     b.Property<int>("ClientId")
                         .HasColumnType("int");
