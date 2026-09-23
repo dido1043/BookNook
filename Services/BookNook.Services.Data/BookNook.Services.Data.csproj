@@ -15,4 +15,8 @@
     <ProjectReference Include="..\..\Data\BookNook.Data\BookNook.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Riok.Mapperly" Version="5.0.0-next.10" />
+  </ItemGroup>
+
 </Project>

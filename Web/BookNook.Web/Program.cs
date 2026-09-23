@@ -1,12 +1,30 @@
 using BookNook.Data;
+using BookNook.Data.Models;
+using BookNook.Data.Repository.Interface;
+using BookNook.Services.Data.Mapper;
+using BookNook.Services.Data.Repository;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddDataLayer(builder.Configuration.GetConnectionString("DefaultConnection")!);
-builder.Services.AddControllersWithViews();
 
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+
+
+builder.Services.AddScoped<ClientMapper>();
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
+
+builder.Services.AddIdentity<Client, IdentityRole<int>>(o =>
+    {
+        o.User.RequireUniqueEmail = false;
+    })
+    .AddEntityFrameworkStores<BookNookContext>()
+    .AddDefaultTokenProviders();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -25,8 +43,12 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();
+
+app.MapRazorPages();
 
 app.MapControllerRoute(
     name: "default",

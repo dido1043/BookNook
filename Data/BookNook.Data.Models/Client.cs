@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace BookNook.Data.Models
 {
-    public class Client
+    public class Client : IdentityUser<int>
     {
         [Key]
         public int Id { get; set; }
@@ -15,12 +16,7 @@ namespace BookNook.Data.Models
         [Phone(ErrorMessage = "Invalid phone number format.")]
         [StringLength(20)]
         public string Phone { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Email address is required.")]
-        [EmailAddress(ErrorMessage = "Invalid email address format.")]
-        [StringLength(100)]
-        public string Email { get; set; } = string.Empty;
-
+        
         [StringLength(250, ErrorMessage = "Delivery address cannot exceed 250 characters.")]
         public string? DeliveryAddress { get; set; }
 
