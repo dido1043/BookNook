@@ -3,11 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookNook.Data.Models
 {
-    public class Order
+    public class Order : BaseEntity
     {
-        [Key]
-        public int Id { get; set; }
-
         [Required]
         public int ClientId { get; set; }
 

@@ -3,11 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookNook.Data.Models
 {
-    public class Book
+    public class Book : BaseEntity
     {
-        [Key]
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "Title is required.")]
         [StringLength(200, MinimumLength = 2, ErrorMessage = "Title must be between 2 and 200 characters.")]
         public string Title { get; set; } = string.Empty;
