@@ -27,6 +27,12 @@ builder.Services.AddIdentity<Client, IdentityRole<int>>(o =>
     .AddDefaultTokenProviders();
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<BookNookContext>();
+    DbSeeder.Seed(context);
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -40,7 +46,6 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapStaticAssets();
 
 app.MapRazorPages();

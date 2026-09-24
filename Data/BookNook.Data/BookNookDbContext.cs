@@ -13,7 +13,7 @@ namespace BookNook.Data
         }
 
         public DbSet<Book> Books { get; set; } = null!;
-        // public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderLine> OrderLines { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
