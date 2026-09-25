@@ -3,6 +3,7 @@ using BookNook.Data.Models;
 using BookNook.Data.Repository.Interface;
 using BookNook.Services.Data.Mapper;
 using BookNook.Services.Data.Repository;
+using BookNook.Services.Data.Service;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,8 +17,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 
-builder.Services.AddScoped<ClientMapper>();
+builder.Services.AddScoped<Mapper>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<BookService>();
 
 builder.Services.AddIdentity<Client, IdentityRole<int>>(o =>
     {
@@ -30,6 +33,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<BookNookContext>();
+    context.Database.Migrate();
     DbSeeder.Seed(context);
 }
 
