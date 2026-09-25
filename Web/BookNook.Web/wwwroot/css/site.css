@@ -1,31 +1,86 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
-  margin-bottom: 60px;
+    font-family: 'VT323', monospace;
+    background-color: #000000;
+    color: #39FF14;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.bg-light, .bg-white {
+    background-color: #0a0a0a !important;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.card, .form-control, .form-select, .alert {
+    background-color: #000 !important;
+    color: #39FF14 !important;
+    border: 3px inset #444 !important;
+    border-radius: 0 !important;
+}
+
+    .form-control::placeholder {
+        color: #007700;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #39FF14 !important;
+        box-shadow: 0 0 8px #39FF14 !important;
+        outline: none;
+    }
+
+.btn {
+    background: linear-gradient(to bottom, #555, #222) !important;
+    color: #39FF14 !important;
+    border: 2px outset #666 !important;
+    border-radius: 0 !important;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+    .btn:hover {
+        background: linear-gradient(to bottom, #666, #333) !important;
+        color: #fff !important;
+        text-shadow: 0 0 5px #39FF14;
+    }
+
+    .btn:active {
+        border: 2px inset #666 !important;
+        background: #111 !important;
+    }
+
+.navbar {
+    background: linear-gradient(to bottom, #333, #111) !important;
+    border-bottom: 2px solid #555 !important;
+}
+
+.navbar-brand, .nav-link {
+    color: #39FF14 !important;
+    text-shadow: 0 0 4px #39FF14;
+}
+
+    .navbar-brand:hover, .nav-link:hover {
+        color: #fff !important;
+    }
+
+.badge.bg-success {
+    background-color: #000 !important;
+    color: #39FF14 !important;
+    border: 1px solid #39FF14;
+}
+
+.badge.bg-danger {
+    background-color: #000 !important;
+    color: #ff3333 !important;
+    border: 1px solid #ff3333;
+    text-shadow: 0 0 4px #ff3333;
+}
+
+.footer {
+    position: relative !important;
+    margin-top: 4rem !important;
+    padding: 1.5rem 0 !important;
+    background: linear-gradient(to bottom, #222, #000) !important;
+    border-top: 3px outset #555 !important;
+    color: #00aa00 !important;
+    text-shadow: none !important;
 }

@@ -1,0 +1,87 @@
+﻿@model BookNook.Web.Models.CatalogViewModel
+@{
+    ViewData["Title"] = "Catalog";
+}
+
+<h2 class="mb-4 text-uppercase">>> Book_Catalog</h2>
+
+<!-- Retro Search Console -->
+<form method="get" class="row g-3 mb-5 p-4 card">
+    <div class="col-md-4">
+        <input type="text" name="searchQuery" value="@Model.SearchQuery" class="form-control" placeholder="SEARCH TITLE OR AUTHOR..." />
+    </div>
+    <div class="col-md-3">
+        <select name="genreFilter" class="form-select">
+            <option value="">ALL GENRES</option>
+            @foreach (var genre in Model.AvailableGenres)
+            {
+                if (Model.GenreFilter == genre)
+                {
+                    <option value="@genre" selected>@genre</option>
+                }
+                else
+                {
+                    <option value="@genre">@genre</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-3 d-flex align-items-center">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="inStockOnly" value="true" id="inStockCheck" @(Model.InStockOnly ? "checked" : "")>
+            <label class="form-check-label ms-2" for="inStockCheck">
+                IN STOCK ONLY
+            </label>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn w-100">EXECUTE</button>
+    </div>
+</form>
+
+@if (!Model.Books.Any())
+{
+    <div class="alert text-uppercase">
+        [!] No records found matching query parameters.
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        @foreach (var book in Model.Books)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title text-truncate" title="@book.Title">@book.Title</h4>
+                        <h5 class="mb-4" style="color: #00cc00;">> @book.Author</h5>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-success">@book.Genre.ToUpper()</span>
+                            <span class="fs-4">€@book.Price.ToString("F2")</span>
+                        </div>
+                        
+                        @if (book.AvailableQuantity > 0)
+                        {
+                            <p class="mb-0">> QTY: @book.AvailableQuantity</p>
+                        }
+                        else
+                        {
+                            <p class="text-danger mb-0">> ERR: OUT_OF_STOCK</p>
+                        }
+                    </div>
+                    <div class="card-footer border-0 pt-0 pb-3 px-3">
+                        @if (book.AvailableQuantity > 0)
+                        {
+                            <a asp-controller="Orders" asp-action="Create" asp-route-bookId="@book.Id" class="btn w-100">ADD TO ORDER</a>
+                        }
+                        else
+                        {
+                            <button class="btn w-100" style="color: #666 !important; border-color: #333 !important;" disabled>LOCKED</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
