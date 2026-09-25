@@ -29,7 +29,7 @@ namespace BookNook.Data
                 Email = "ivan@example.com",
                 DeliveryAddress = "Plovdiv, ul. Gladston 1"
             };
-            context.Clients.Add(client);
+            context.Users.Add(client);
             context.SaveChanges();
 
             var order = new Order

@@ -5,12 +5,13 @@ namespace BookNook.Services.Data.Repository;
 using BookNook.Data;
 using BookNook.Data.Repository.Interface;
 using BookNook.Data.Models;
+using BookNook.Services.Data.Mapper;
 
 public class ClientRepository : IClientRepository
 {
     private readonly BookNookContext _context;
-    private readonly ClientMapper _clientMapper;
-    public ClientRepository(BookNookContext context,  ClientMapper clientMapper)
+    private readonly Mapper _clientMapper;
+    public ClientRepository(BookNookContext context,  Mapper clientMapper)
     {
         _context = context;
         _clientMapper = clientMapper;
