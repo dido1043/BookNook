@@ -15,4 +15,8 @@ public partial class Mapper
     public partial BookDto BookToDto(Book book);
     public partial Book DtoToBook(BookDto bookDto);
     public partial List<BookDto> ToBookDtoList(List<Book> objectList);
+    
+    //Order line
+    public partial OrderLineDto OLToDto(OrderLine orderLine);
+    public partial OrderLine DtoToOL(OrderLineDto orderLineDto);
 }
