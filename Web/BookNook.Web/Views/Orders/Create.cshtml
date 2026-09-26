@@ -1,0 +1,199 @@
+﻿@model BookNook.Web.Models.OrderFormViewModel
+@{
+    ViewData["Title"] = "New Order";
+}
+
+<h2 class="mb-4 text-uppercase">>> Init_Order_Sequence</h2>
+
+<form asp-action="Create" method="post" class="card p-4">
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label asp-for="ClientId" class="form-label fw-bold">> CLIENT</label>
+            <select asp-for="ClientId" class="form-select" required>
+                <option value="">-- SELECT CLIENT --</option>
+                @foreach (var client in Model.AvailableClients)
+                {
+                    <option value="@client.Id">@client.Name</option>
+                }
+            </select>
+            <span asp-validation-for="ClientId" class="text-danger d-block mt-1"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="DeliveryMethod" class="form-label fw-bold">> DELIVERY</label>
+            <select asp-for="DeliveryMethod" class="form-select" id="deliveryMethodSelect" required>
+                <option value="1">IN_STORE (0.00)</option>
+                <option value="2">DELIVERY (5.00)</option>
+            </select>
+            <span asp-validation-for="DeliveryMethod" class="text-danger d-block mt-1"></span>
+        </div>
+
+        <div class="col-md-4">
+            <label asp-for="Status" class="form-label fw-bold">> STATUS</label>
+            <input type="text" class="form-control" value="@Model.Status.ToString().ToUpper()" readonly style="color: #666; border-color: #333;" />
+            <input type="hidden" asp-for="Status" value="@Model.Status" />
+        </div>
+    </div>
+
+    <hr style="border-color: #39FF14;" class="mb-4" />
+
+    <h4 class="mb-3">>> ORDER_LINES</h4>
+
+    <div id="orderLinesContainer">
+        @for (int i = 0; i < Model.OrderLines.Count; i++)
+        {
+            <div class="row g-2 mb-2 order-line align-items-end">
+                <input type="hidden" asp-for="OrderLines[i].BookId" class="book-id" />
+                <input type="hidden" asp-for="OrderLines[i].UnitPrice" class="unit-price" />
+                <input type="hidden" asp-for="OrderLines[i].MaxQuantity" class="max-qty" />
+
+                <div class="col-md-6">
+                    <input type="text" asp-for="OrderLines[i].BookTitle" class="form-control" readonly style="color: #666; border-color: #333;" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">> QTY (MAX: @Model.OrderLines[i].MaxQuantity)</label>
+                    <input type="number" asp-for="OrderLines[i].Quantity" class="form-control qty-input" min="1" max="@Model.OrderLines[i].MaxQuantity" required />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">> PRICE</label>
+                    <input type="text" class="form-control line-price" value="€@Model.OrderLines[i].UnitPrice.ToString("F2")" readonly style="color: #666; border-color: #333;" />
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger w-100 remove-line-btn">REMOVE</button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row g-2 mt-3 p-3 mb-4" style="border: 2px dashed #444; background-color: #0a0a0a;">
+        <div class="col-md-8">
+            <select id="newBookSelect" class="form-select">
+                <option value="">-- ADD BOOK TO ORDER --</option>
+                @foreach (var book in Model.AvailableBooks)
+                {
+                    <option value="@book.Id" data-title="@book.Title" data-price="@book.Price" data-max="@book.AvailableQuantity">
+                        @book.Title (In Stock: @book.AvailableQuantity) - €@book.Price.ToString("F2")
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <button type="button" id="addLineBtn" class="btn btn-success w-100">ADD LINE</button>
+        </div>
+    </div>
+
+    <div class="row g-3 justify-content-end align-items-center mt-4 p-3" style="border: 2px inset #444; background-color: #000;">
+        <div class="col-md-4 text-end">
+            <div id="discountIndicator" class="text-success small mb-1" style="display:none;">> 10% DISCOUNT ACTIVE (OVER 50€)</div>
+            <h3 class="mb-0">TOTAL: <span id="finalTotalDisplay">€0.00</span></h3>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn w-100 fs-4" style="color: #39FF14; border-color:#39FF14;">COMMIT_ORDER</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            const DISCOUNT_THRESHOLD = 50.00;
+            const DISCOUNT_PERCENT = 0.10;
+            const DELIVERY_PRICE = 5.00;
+
+            function calculateTotals() {
+                let itemsTotal = 0;
+                let discountAmount = 0;
+                let deliveryFee = 0;
+
+                $('.order-line').each(function () {
+                    const price = parseFloat($(this).find('.unit-price').val()) || 0;
+                    const qty = parseInt($(this).find('.qty-input').val()) || 0;
+                    itemsTotal += (price * qty);
+                });
+
+                if (itemsTotal > DISCOUNT_THRESHOLD) {
+                    discountAmount = itemsTotal * DISCOUNT_PERCENT;
+                    $('#discountIndicator').show();
+                } else {
+                    $('#discountIndicator').hide();
+                }
+
+                const isDelivery = $('#deliveryMethodSelect').val() === "2";
+                if (isDelivery && discountAmount === 0) {
+                    deliveryFee = DELIVERY_PRICE;
+                }
+
+                const finalTotal = itemsTotal - discountAmount + deliveryFee;
+                $('#finalTotalDisplay').text('€' + finalTotal.toFixed(2));
+            }
+
+            $(document).on('input', '.qty-input', calculateTotals);$('#deliveryMethodSelect').change(calculateTotals);
+
+            $('#addLineBtn').click(function () {
+                const selectedOption = $('#newBookSelect option:selected');
+                if (!selectedOption.val()) return;
+
+                const bookId = selectedOption.val();
+
+                let exists = false;
+                $('.book-id').each(function() {
+                    if ($(this).val() === bookId) exists = true;
+                });
+
+                if (exists) {
+                    alert('ERR: ITEM_ALREADY_IN_ORDER');
+                    return;
+                }
+
+                const title = selectedOption.data('title');
+                const price = parseFloat(selectedOption.data('price')).toFixed(2);
+                const maxQty = selectedOption.data('max');
+
+                const index = $('.order-line').length;
+
+                const newRow = `
+                    <div class="row g-2 mb-2 order-line align-items-end">
+                        <input type="hidden" name="OrderLines[${index}].BookId" value="${bookId}" class="book-id" />
+                        <input type="hidden" name="OrderLines[${index}].UnitPrice" value="${price}" class="unit-price" />
+                        <input type="hidden" name="OrderLines[${index}].MaxQuantity" value="${maxQty}" class="max-qty" />
+                        <input type="hidden" name="OrderLines[${index}].BookTitle" value="${title}" />
+
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" value="${title}" readonly style="color: #666; border-color: #333;" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">> QTY (MAX: ${maxQty})</label>
+                            <input type="number" name="OrderLines[${index}].Quantity" class="form-control qty-input" value="1" min="1" max="${maxQty}" required />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">> PRICE</label>
+                            <input type="text" class="form-control line-price" value="€${price}" readonly style="color: #666; border-color: #333;" />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger w-100 remove-line-btn">REMOVE</button>
+                        </div>
+                    </div>`;
+
+                $('#orderLinesContainer').append(newRow);
+                $('#newBookSelect').val('');
+                calculateTotals();
+            });
+
+            $(document).on('click', '.remove-line-btn', function () {$(this).closest('.order-line').remove();
+
+                $('.order-line').each(function(i) {$(this).find('input').each(function() {
+                        const name = $(this).attr('name');
+                        if (name) {
+                            $(this).attr('name', name.replace(/OrderLines\[\d+\]/, `OrderLines[${i}]`));
+                        }
+                    });
+                });
+
+                calculateTotals();
+            });
+
+            calculateTotals();
+        });
+    </script>
+}
