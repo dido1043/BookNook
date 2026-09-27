@@ -161,5 +161,83 @@ namespace BookNook.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var order = await _context.Orders
+                .Include(o => o.Client)
+                .Include(o => o.OrderLines)
+                    .ThenInclude(ol => ol.Book)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (order == null) return NotFound();
+
+            return View(order);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, OrderStatus newStatus)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderLines)
+                    .ThenInclude(ol => ol.Book)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (order == null) return NotFound();
+
+            if (order.Status == OrderStatus.Fulfilled)
+            {
+                ModelState.AddModelError(string.Empty, "Cannot modify a fulfilled order.");
+                return View(order);
+            }
+
+            if (order.Status == newStatus)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            var oldStatus = order.Status;
+            order.Status = newStatus;
+
+            foreach (var line in order.OrderLines)
+            {
+                if (newStatus == OrderStatus.Confirmed && oldStatus != OrderStatus.Confirmed)
+                {
+                    if (line.Book.AvailableQuantity < line.Quantity)
+                    {
+                        ModelState.AddModelError(string.Empty, $"Insufficient stock for '{line.Book.Title}'. Cannot confirm.");
+                        order.Status = oldStatus;
+                        return View(order);
+                    }
+                    line.Book.AvailableQuantity -= line.Quantity;
+                }
+
+                else if (oldStatus == OrderStatus.Confirmed && (newStatus == OrderStatus.Rejected || newStatus == OrderStatus.New))
+                {
+                    line.Book.AvailableQuantity += line.Quantity;
+                }
+            }
+
+            try
+            {
+                _context.Update(order);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!OrderExists(order.Id)) return NotFound();
+                else throw;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool OrderExists(int id)
+        {
+            return _context.Orders.Any(e => e.Id == id);
+        }
     }
 }

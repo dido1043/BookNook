@@ -1,0 +1,113 @@
+﻿@using BookNook.Data.Models
+@model BookNook.Data.Models.Order
+@{
+    ViewData["Title"] = "Order Details";
+    bool isReadOnly = Model.Status == OrderStatus.Fulfilled;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0 text-uppercase">>> Order_#@Model.Id</h2>
+    <a asp-action="Index" class="btn">> RETURN_TO_LIST</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card p-4 h-100">
+            <h4 class="mb-4">>> INFO</h4>
+            <div class="row mb-3">
+                <div class="col-sm-3 text-uppercase" style="color: #666;">Client</div>
+                <div class="col-sm-9 fw-bold">@Model.Client.Name</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3 text-uppercase" style="color: #666;">Date</div>
+                <div class="col-sm-9">@Model.OrderDate.ToString("yyyy-MM-dd HH:mm")</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3 text-uppercase" style="color: #666;">Delivery</div>
+                <div class="col-sm-9">@(Model.DeliveryMethod == DeliveryMethod.InStore ? "IN_STORE" : "DELIVERY")</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3 text-uppercase" style="color: #666;">Total</div>
+                <div class="col-sm-9 fw-bold fs-5">€@Model.TotalSum.ToString("F2")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-4 h-100">
+            <h4 class="mb-4">>> STATUS</h4>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger" style="background-color: #330000; border-color: #ff3333; color: #ff3333;">
+                    <div asp-validation-summary="All" class="mb-0"></div>
+                </div>
+            }
+
+            @if (isReadOnly)
+            {
+                <div class="alert bg-success text-center border-0 p-3 mb-0 text-dark fw-bold">
+                    [ FULFILLED - READ_ONLY_MODE ]
+                </div>
+            }
+            else
+            {
+                <form asp-action="Edit" class="d-flex flex-column h-100">
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-auto">
+                        <label class="form-label text-uppercase">> Update_Status</label>
+                        <select name="newStatus" class="form-select form-select-lg mb-3">
+                            @foreach (var status in Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>())
+                            {
+                                if (Model.Status == status)
+                                {
+                                    <option value="@status" selected>@status.ToString().ToUpper()</option>
+                                }
+                                else
+                                {
+                                    <option value="@status">@status.ToString().ToUpper()</option>
+                                }
+                            }
+                        </select>
+                        <p class="small" style="color: #aaa;">
+                            * Confirming decreases stock.<br />
+                            * Rejecting restores stock.
+                        </p>
+                    </div>
+
+                    <button type="submit" class="btn w-100 mt-3" style="color: #39FF14; border-color:#39FF14;">EXECUTE_UPDATE</button>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4 p-0">
+    <h4 class="p-3 mb-0" style="border-bottom: 2px solid #444;">>> ITEMS</h4>
+    <div class="table-responsive">
+        <table class="table table-dark mb-0">
+            <thead>
+                <tr style="border-bottom: 2px solid #39FF14;">
+                    <th>BOOK</th>
+                    <th>AUTHOR</th>
+                    <th class="text-center">QTY</th>
+                    <th class="text-end">PRICE</th>
+                    <th class="text-end">SUBTOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var line in Model.OrderLines)
+                {
+                    <tr style="border-bottom: 1px solid #222;">
+                        <td>@line.Book.Title</td>
+                        <td style="color: #666;">@line.Book.Author</td>
+                        <td class="text-center">@line.Quantity</td>
+                        <td class="text-end">€@line.UnitPrice.ToString("F2")</td>
+                        <td class="text-end fw-bold">€@((line.Quantity * line.UnitPrice).ToString("F2"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
