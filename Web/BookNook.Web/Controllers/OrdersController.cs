@@ -17,6 +17,46 @@ namespace BookNook.Web.Controllers
             _configuration = configuration;
         }
 
+        public async Task<IActionResult> Index(string? clientSearch, OrderStatus? statusFilter, DateTime? startDate, DateTime? endDate)
+        {
+            var query = _context.Orders.Include(o => o.Client).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(clientSearch))
+            {
+                var searchLower = clientSearch.ToLower();
+                query = query.Where(o => o.Client.Name.ToLower().Contains(searchLower));
+            }
+
+            if (statusFilter.HasValue)
+            {
+                query = query.Where(o => o.Status == statusFilter.Value);
+            }
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(o => o.OrderDate >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                var endOfPeriod = endDate.Value.AddDays(1);
+                query = query.Where(o => o.OrderDate < endOfPeriod);
+            }
+
+            query = query.OrderByDescending(o => o.OrderDate);
+
+            var viewModel = new OrderListViewModel
+            {
+                Orders = await query.ToListAsync(),
+                ClientSearch = clientSearch,
+                StatusFilter = statusFilter,
+                StartDate = startDate,
+                EndDate = endDate
+            };
+
+            return View(viewModel);
+        }
+
         public async Task<IActionResult> Create(int? bookId)
         {
             var viewModel = new OrderFormViewModel

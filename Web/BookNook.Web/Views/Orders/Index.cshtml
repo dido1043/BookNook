@@ -1,0 +1,115 @@
+﻿@using BookNook.Data.Models
+@model BookNook.Web.Models.OrderListViewModel
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0 text-uppercase">>> Order_Database</h2>
+    <a asp-action="Create" class="btn btn-success">> NEW_ORDER</a>
+</div>
+
+<form method="get" class="row g-3 mb-4 p-4 card align-items-end">
+    <div class="col-md-3">
+        <label class="form-label small text-uppercase">> Client_Search</label>
+        <input type="text" name="clientSearch" value="@Model.ClientSearch" class="form-control" placeholder="CLIENT NAME..." />
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label small text-uppercase">> Status_Filter</label>
+        <select name="statusFilter" class="form-select">
+            <option value="">ALL STATUSES</option>
+            @foreach (var status in Enum.GetValues(typeof(OrderStatus)).Cast<OrderStatus>())
+            {
+                if (Model.StatusFilter == status)
+                {
+                    <option value="@status" selected>@status.ToString().ToUpper()</option>
+                }
+                else
+                {
+                    <option value="@status">@status.ToString().ToUpper()</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label small text-uppercase">> Date_From</label>
+        <input type="date" name="startDate" value="@Model.StartDate?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label small text-uppercase">> Date_To</label>
+        <input type="date" name="endDate" value="@Model.EndDate?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+
+    <div class="col-md-2">
+        <button type="submit" class="btn w-100 w-100">FILTER</button>
+    </div>
+</form>
+
+@if (!Model.Orders.Any())
+{
+    <div class="alert text-uppercase">
+        [!] No orders found matching parameters.
+    </div>
+}
+else
+{
+    <div class="table-responsive card p-0">
+        <table class="table table-dark table-hover mb-0" style="background-color: transparent;">
+            <thead>
+                <tr style="border-bottom: 2px solid #39FF14;">
+                    <th>ID</th>
+                    <th>DATE</th>
+                    <th>CLIENT</th>
+                    <th>DELIVERY</th>
+                    <th>STATUS</th>
+                    <th class="text-end">TOTAL</th>
+                    <th class="text-center">ACTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model.Orders)
+                {
+                    <tr style="border-bottom: 1px solid #444;">
+                        <td>#@order.Id</td>
+                        <td>@order.OrderDate.ToString("dd MMM yyyy HH:mm")</td>
+                        <td>@order.Client.Name</td>
+                        <td>
+                            @if (order.DeliveryMethod == DeliveryMethod.InStore)
+                            {
+                                <span>IN_STORE</span>
+                            }
+                            else
+                            {
+                                <span>DELIVERY</span>
+                            }
+                        </td>
+                        <td>
+                            @switch (order.Status)
+                            {
+                                case OrderStatus.New:
+                                    <span class="badge bg-secondary">@order.Status.ToString().ToUpper()</span>
+                                    break;
+                                case OrderStatus.Confirmed:
+                                    <span class="badge bg-primary">@order.Status.ToString().ToUpper()</span>
+                                    break;
+                                case OrderStatus.Fulfilled:
+                                    <span class="badge bg-success">@order.Status.ToString().ToUpper()</span>
+                                    break;
+                                case OrderStatus.Rejected:
+                                    <span class="badge bg-danger">@order.Status.ToString().ToUpper()</span>
+                                    break;
+                            }
+                        </td>
+                        <td class="text-end fw-bold">€@order.TotalSum.ToString("F2")</td>
+                        <td class="text-center">
+                            <a href="#" class="btn btn-sm py-0">> VIEW</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
