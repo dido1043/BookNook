@@ -1,5 +1,6 @@
 using BookNook.Data.DTO;
 using BookNook.Services.Data.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookNook.Controllers;
@@ -29,6 +30,7 @@ public class BookController : Controller
         return View(book);
     }
 
+    [Authorize(Roles = "Admin")]
     public IActionResult Create()
     {
         return View();
@@ -36,6 +38,7 @@ public class BookController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(BookDto book)
     {
         if (!ModelState.IsValid)
@@ -46,6 +49,7 @@ public class BookController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int id)
     {
         var book = await _bookService.GetBookById(id);
@@ -58,6 +62,7 @@ public class BookController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int id, BookDto book)
     {
         if (id != book.Id)
@@ -72,6 +77,7 @@ public class BookController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var book = await _bookService.GetBookById(id);
@@ -84,6 +90,7 @@ public class BookController : Controller
 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var book = await _bookService.GetBookById(id);

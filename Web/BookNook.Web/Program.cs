@@ -20,7 +20,11 @@ builder.Services.AddRazorPages();
 builder.Services.AddScoped<Mapper>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderLineRepository, OrderLineRepository>();
 builder.Services.AddScoped<BookService>();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<OrderLineService>();
 
 builder.Services.AddIdentity<Client, IdentityRole<int>>(o =>
     {
@@ -33,8 +37,10 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<BookNookContext>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Client>>();
     context.Database.Migrate();
-    DbSeeder.Seed(context);
+    await DbSeeder.SeedAsync(context, roleManager, userManager);
 }
 
 // Configure the HTTP request pipeline.

@@ -1,5 +1,5 @@
 ﻿@using BookNook.Data.Models
-@model BookNook.Data.Models.Order
+@model BookNook.Data.DTO.OrderDto
 @{
     ViewData["Title"] = "Order Details";
     bool isReadOnly = Model.Status == OrderStatus.Fulfilled;
@@ -16,7 +16,7 @@
             <h4 class="mb-4">>> INFO</h4>
             <div class="row mb-3">
                 <div class="col-sm-3 text-uppercase" style="color: #666;">Client</div>
-                <div class="col-sm-9 fw-bold">@Model.Client.Name</div>
+                <div class="col-sm-9 fw-bold">@Model.ClientName</div>
             </div>
             <div class="row mb-3">
                 <div class="col-sm-3 text-uppercase" style="color: #666;">Date</div>
@@ -100,8 +100,8 @@
                 @foreach (var line in Model.OrderLines)
                 {
                     <tr style="border-bottom: 1px solid #222;">
-                        <td>@line.Book.Title</td>
-                        <td style="color: #666;">@line.Book.Author</td>
+                        <td>@line.BookTitle</td>
+                        <td style="color: #666;">@line.BookAuthor</td>
                         <td class="text-center">@line.Quantity</td>
                         <td class="text-end">€@line.UnitPrice.ToString("F2")</td>
                         <td class="text-end fw-bold">€@((line.Quantity * line.UnitPrice).ToString("F2"))</td>

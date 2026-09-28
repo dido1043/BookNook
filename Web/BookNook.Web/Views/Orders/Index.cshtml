@@ -75,7 +75,7 @@ else
                     <tr style="border-bottom: 1px solid #444;">
                         <td>#@order.Id</td>
                         <td>@order.OrderDate.ToString("dd MMM yyyy HH:mm")</td>
-                        <td>@order.Client.Name</td>
+                        <td>@order.ClientName</td>
                         <td>
                             @if (order.DeliveryMethod == DeliveryMethod.InStore)
                             {

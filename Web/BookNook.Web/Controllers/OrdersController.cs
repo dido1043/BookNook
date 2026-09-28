@@ -1,53 +1,33 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using BookNook.Data;
 using BookNook.Data.Models;
+using BookNook.Services.Data.Service;
 using BookNook.Web.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookNook.Web.Controllers
 {
+    [Authorize]
     public class OrdersController : Controller
     {
+        private readonly OrderService _orderService;
         private readonly BookNookContext _context;
-        private readonly IConfiguration _configuration;
 
-        public OrdersController(BookNookContext context, IConfiguration configuration)
+        public OrdersController(OrderService orderService, BookNookContext context)
         {
+            _orderService = orderService;
             _context = context;
-            _configuration = configuration;
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index(string? clientSearch, OrderStatus? statusFilter, DateTime? startDate, DateTime? endDate)
         {
-            var query = _context.Orders.Include(o => o.Client).AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(clientSearch))
-            {
-                var searchLower = clientSearch.ToLower();
-                query = query.Where(o => o.Client.Name.ToLower().Contains(searchLower));
-            }
-
-            if (statusFilter.HasValue)
-            {
-                query = query.Where(o => o.Status == statusFilter.Value);
-            }
-
-            if (startDate.HasValue)
-            {
-                query = query.Where(o => o.OrderDate >= startDate.Value);
-            }
-
-            if (endDate.HasValue)
-            {
-                var endOfPeriod = endDate.Value.AddDays(1);
-                query = query.Where(o => o.OrderDate < endOfPeriod);
-            }
-
-            query = query.OrderByDescending(o => o.OrderDate);
+            var orders = await _orderService.GetAllAsync(clientSearch, statusFilter, startDate, endDate);
 
             var viewModel = new OrderListViewModel
             {
-                Orders = await query.ToListAsync(),
+                Orders = orders,
                 ClientSearch = clientSearch,
                 StatusFilter = statusFilter,
                 StartDate = startDate,
@@ -57,6 +37,7 @@ namespace BookNook.Web.Controllers
             return View(viewModel);
         }
 
+        [Authorize(Roles = "Client")]
         public async Task<IActionResult> Create(int? bookId)
         {
             var viewModel = new OrderFormViewModel
@@ -87,6 +68,7 @@ namespace BookNook.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Client")]
         public async Task<IActionResult> Create(OrderFormViewModel viewModel)
         {
             viewModel.AvailableClients = await _context.Clients.OrderBy(c => c.Name).ToListAsync();
@@ -103,75 +85,26 @@ namespace BookNook.Web.Controllers
                 return View(viewModel);
             }
 
-            var order = new Order
+            var error = await _orderService.CreateOrderAsync(
+                viewModel.ClientId,
+                viewModel.DeliveryMethod,
+                viewModel.OrderLines.Select(l => (l.BookId, l.Quantity)));
+
+            if (error != null)
             {
-                ClientId = viewModel.ClientId,
-                OrderDate = DateTime.Now,
-                Status = OrderStatus.New,
-                DeliveryMethod = viewModel.DeliveryMethod,
-                OrderLines = new List<OrderLine>()
-            };
-
-            decimal itemsTotal = 0;
-
-            foreach (var lineVm in viewModel.OrderLines)
-            {
-                var book = await _context.Books.FindAsync(lineVm.BookId);
-
-                if (book == null) continue;
-
-                if (lineVm.Quantity > book.AvailableQuantity)
-                {
-                    ModelState.AddModelError(string.Empty, $"Insufficient stock for {book.Title}. Max available: {book.AvailableQuantity}");
-                    return View(viewModel);
-                }
-
-                order.OrderLines.Add(new OrderLine
-                {
-                    BookId = book.Id,
-                    Quantity = lineVm.Quantity,
-                    UnitPrice = book.Price
-                });
-
-                itemsTotal += (book.Price * lineVm.Quantity);
+                ModelState.AddModelError(string.Empty, error);
+                return View(viewModel);
             }
-
-            var storeSettings = _configuration.GetSection("StoreSettings");
-            decimal discountThreshold = storeSettings.GetValue<decimal>("DiscountThreshold");
-            decimal discountPercent = storeSettings.GetValue<decimal>("DiscountPercentage");
-            decimal deliveryPrice = storeSettings.GetValue<decimal>("DeliveryPrice");
-
-            decimal discountAmount = 0;
-            decimal deliveryFee = 0;
-
-            if (itemsTotal > discountThreshold)
-            {
-                discountAmount = itemsTotal * discountPercent;
-            }
-
-            if (order.DeliveryMethod == DeliveryMethod.Delivery && discountAmount == 0)
-            {
-                deliveryFee = deliveryPrice;
-            }
-
-            order.TotalSum = itemsTotal - discountAmount + deliveryFee;
-
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
-            var order = await _context.Orders
-                .Include(o => o.Client)
-                .Include(o => o.OrderLines)
-                    .ThenInclude(ol => ol.Book)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
+            var order = await _orderService.GetByIdAsync(id.Value);
             if (order == null) return NotFound();
 
             return View(order);
@@ -179,65 +112,21 @@ namespace BookNook.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, OrderStatus newStatus)
         {
-            var order = await _context.Orders
-                .Include(o => o.OrderLines)
-                    .ThenInclude(ol => ol.Book)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var error = await _orderService.UpdateStatusAsync(id, newStatus);
 
-            if (order == null) return NotFound();
-
-            if (order.Status == OrderStatus.Fulfilled)
+            if (error != null)
             {
-                ModelState.AddModelError(string.Empty, "Cannot modify a fulfilled order.");
+                if (!await _orderService.ExistsAsync(id)) return NotFound();
+
+                var order = await _orderService.GetByIdAsync(id);
+                ModelState.AddModelError(string.Empty, error);
                 return View(order);
             }
 
-            if (order.Status == newStatus)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
-            var oldStatus = order.Status;
-            order.Status = newStatus;
-
-            foreach (var line in order.OrderLines)
-            {
-                if (newStatus == OrderStatus.Confirmed && oldStatus != OrderStatus.Confirmed)
-                {
-                    if (line.Book.AvailableQuantity < line.Quantity)
-                    {
-                        ModelState.AddModelError(string.Empty, $"Insufficient stock for '{line.Book.Title}'. Cannot confirm.");
-                        order.Status = oldStatus;
-                        return View(order);
-                    }
-                    line.Book.AvailableQuantity -= line.Quantity;
-                }
-
-                else if (oldStatus == OrderStatus.Confirmed && (newStatus == OrderStatus.Rejected || newStatus == OrderStatus.New))
-                {
-                    line.Book.AvailableQuantity += line.Quantity;
-                }
-            }
-
-            try
-            {
-                _context.Update(order);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!OrderExists(order.Id)) return NotFound();
-                else throw;
-            }
-
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool OrderExists(int id)
-        {
-            return _context.Orders.Any(e => e.Id == id);
         }
     }
 }

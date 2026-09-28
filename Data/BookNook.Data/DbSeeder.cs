@@ -1,11 +1,21 @@
-﻿using BookNook.Data.Models;
+using BookNook.Data.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace BookNook.Data
 {
     public static class DbSeeder
     {
-        public static void Seed(BookNookContext context)
+        public const string AdminRole = "Admin";
+        public const string ClientRole = "Client";
+
+        public static async Task SeedAsync(
+            BookNookContext context,
+            RoleManager<IdentityRole<int>> roleManager,
+            UserManager<Client> userManager)
         {
+            await SeedRolesAsync(roleManager);
+            await SeedAdminAsync(userManager);
+
             if (context.Books.Any())
             {
                 return;
@@ -27,10 +37,14 @@ namespace BookNook.Data
                 Name = "Ivan Ivanov",
                 Phone = "0888123456",
                 Email = "ivan@example.com",
+                UserName = "ivan@example.com",
                 DeliveryAddress = "Plovdiv, ul. Gladston 1"
             };
-            context.Users.Add(client);
-            context.SaveChanges();
+            var createResult = await userManager.CreateAsync(client, "Password123!");
+            if (createResult.Succeeded)
+            {
+                await userManager.AddToRoleAsync(client, ClientRole);
+            }
 
             var order = new Order
             {
@@ -50,6 +64,37 @@ namespace BookNook.Data
             };
             context.OrderLines.AddRange(orderLines);
             context.SaveChanges();
+        }
+
+        private static async Task SeedRolesAsync(RoleManager<IdentityRole<int>> roleManager)
+        {
+            foreach (var role in new[] { AdminRole, ClientRole })
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole<int>(role));
+                }
+            }
+        }
+
+        private static async Task SeedAdminAsync(UserManager<Client> userManager)
+        {
+            const string adminEmail = "admin@booknook.local";
+            if (await userManager.FindByEmailAsync(adminEmail) != null) return;
+
+            var admin = new Client
+            {
+                Name = "System Admin",
+                Phone = "0000000000",
+                Email = adminEmail,
+                UserName = adminEmail,
+                DeliveryAddress = null
+            };
+            var result = await userManager.CreateAsync(admin, "Admin123!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(admin, AdminRole);
+            }
         }
     }
 }
