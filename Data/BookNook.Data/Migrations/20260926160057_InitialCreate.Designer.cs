@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookNook.Data.Migrations
 {
     [DbContext(typeof(BookNookContext))]
-    [Migration("20260923115146_UpdateClientModel")]
-    partial class UpdateClientModel
+    [Migration("20260926160057_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -87,7 +87,6 @@ namespace BookNook.Data.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -187,7 +186,7 @@ namespace BookNook.Data.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("Order");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("BookNook.Data.Models.OrderLine", b =>

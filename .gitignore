@@ -34,6 +34,10 @@ publish/
 *.pfx
 *.p12
 secrets.json
+Web/BookNook.Web/appsettings.json
+
+# EF Core migrations
+Data/BookNook.Data/Migrations/
 
 # OS
 .DS_Store

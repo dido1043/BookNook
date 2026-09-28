@@ -84,7 +84,6 @@ namespace BookNook.Data.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -184,7 +183,7 @@ namespace BookNook.Data.Migrations
 
                     b.HasIndex("ClientId");
 
-                    b.ToTable("Order");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("BookNook.Data.Models.OrderLine", b =>
