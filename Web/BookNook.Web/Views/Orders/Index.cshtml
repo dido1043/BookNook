@@ -10,12 +10,16 @@
 </div>
 
 <form method="get" class="row g-3 mb-4 p-4 card align-items-end">
-    <div class="col-md-3">
-        <label class="form-label small text-uppercase">> Client_Search</label>
-        <input type="text" name="clientSearch" value="@Model.ClientSearch" class="form-control" placeholder="CLIENT NAME..." />
-    </div>
 
-    <div class="col-md-3">
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="col-md-3">
+            <label class="form-label small text-uppercase">> Client_Search</label>
+            <input type="text" name="clientSearch" value="@Model.ClientSearch" class="form-control" placeholder="CLIENT NAME..." />
+        </div>
+    }
+
+    <div class="@(User.IsInRole("Admin") ? "col-md-3" : "col-md-4")">
         <label class="form-label small text-uppercase">> Status_Filter</label>
         <select name="statusFilter" class="form-select">
             <option value="">ALL STATUSES</option>
@@ -33,18 +37,18 @@
         </select>
     </div>
 
-    <div class="col-md-2">
+    <div class="@(User.IsInRole("Admin") ? "col-md-2" : "col-md-3")">
         <label class="form-label small text-uppercase">> Date_From</label>
         <input type="date" name="startDate" value="@Model.StartDate?.ToString("yyyy-MM-dd")" class="form-control" />
     </div>
 
-    <div class="col-md-2">
+    <div class="@(User.IsInRole("Admin") ? "col-md-2" : "col-md-3")">
         <label class="form-label small text-uppercase">> Date_To</label>
         <input type="date" name="endDate" value="@Model.EndDate?.ToString("yyyy-MM-dd")" class="form-control" />
     </div>
 
     <div class="col-md-2">
-        <button type="submit" class="btn w-100 w-100">FILTER</button>
+        <button type="submit" class="btn w-100">FILTER</button>
     </div>
 </form>
 
