@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Data\BookNook.Data.Models\BookNook.Data.Models.csproj" />
     <ProjectReference Include="..\..\Data\BookNook.Data\BookNook.Data.csproj" />
+    <ProjectReference Include="..\..\Web\BookNook.Web.ViewModels\BookNook.Web.ViewModels.csproj" />
   </ItemGroup>
 
   <ItemGroup>

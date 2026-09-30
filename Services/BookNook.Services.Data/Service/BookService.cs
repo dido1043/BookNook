@@ -1,6 +1,7 @@
 using BookNook.Data.DTO;
 using BookNook.Data.Models;
 using BookNook.Data.Repository.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookNook.Services.Data.Service;
 
@@ -41,9 +42,17 @@ public class BookService
         await _bookRepository.SaveAsync();
     }
 
-    public async Task DeleteBook(BookDto book)
+    public async Task<string?> DeleteBook(BookDto book)
     {
-        _bookRepository.Delete(book);
-        await _bookRepository.SaveAsync();
+        try
+        {
+            _bookRepository.Delete(book);
+            await _bookRepository.SaveAsync();
+            return null;
+        }
+        catch (DbUpdateException)
+        {
+            return "ERR: CANNOT_DELETE_BOOK. This book is part of an existing order and is locked by the system.";
+        }
     }
 }

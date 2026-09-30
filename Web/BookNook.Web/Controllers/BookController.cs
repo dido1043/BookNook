@@ -98,7 +98,15 @@ public class BookController : Controller
         {
             return NotFound();
         }
-        await _bookService.DeleteBook(book);
+
+        var errorMessage = await _bookService.DeleteBook(book);
+
+        if (errorMessage != null)
+        {
+            ModelState.AddModelError(string.Empty, errorMessage);
+            return View(book);
+        }
+
         return RedirectToAction(nameof(Index));
     }
 }
