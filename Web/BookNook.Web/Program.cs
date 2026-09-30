@@ -25,6 +25,7 @@ builder.Services.AddScoped<IOrderLineRepository, OrderLineRepository>();
 builder.Services.AddScoped<BookService>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<OrderLineService>();
+builder.Services.AddScoped<ReportService>();
 
 builder.Services.AddIdentity<Client, IdentityRole<int>>(o =>
     {

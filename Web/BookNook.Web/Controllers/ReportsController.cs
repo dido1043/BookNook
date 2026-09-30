@@ -55,10 +55,8 @@ namespace BookNook.Web.Controllers
         private async Task<ReportViewModel> GenerateReportDataAsync(DateTime? startDate, DateTime? endDate)
         {
             var query = _context.OrderLines
-                .Include(ol => ol.Order)
-                .Include(ol => ol.Book)
-                .Where(ol => ol.Order.Status == OrderStatus.Confirmed || ol.Order.Status == OrderStatus.Fulfilled)
-                .AsQueryable();
+                .AsNoTracking()
+                .Where(ol => ol.Order.Status == OrderStatus.Confirmed || ol.Order.Status == OrderStatus.Fulfilled);
 
             if (startDate.HasValue)
             {
@@ -71,9 +69,7 @@ namespace BookNook.Web.Controllers
                 query = query.Where(ol => ol.Order.OrderDate < endOfPeriod);
             }
 
-            var allValidLines = await query.ToListAsync();
-
-            var genreStats = allValidLines
+            var genreStats = await query
                 .GroupBy(ol => ol.Book.Genre)
                 .Select(g => new GenreStat
                 {
@@ -82,9 +78,9 @@ namespace BookNook.Web.Controllers
                     Revenue = g.Sum(ol => ol.Quantity * ol.UnitPrice)
                 })
                 .OrderByDescending(g => g.Revenue)
-                .ToList();
+                .ToListAsync();
 
-            var topBooks = allValidLines
+            var topBooks = await query
                 .GroupBy(ol => new { ol.Book.Title, ol.Book.Author })
                 .Select(g => new TopBookStat
                 {
@@ -94,7 +90,7 @@ namespace BookNook.Web.Controllers
                 })
                 .OrderByDescending(b => b.UnitsSold)
                 .Take(5)
-                .ToList();
+                .ToListAsync();
 
             return new ReportViewModel
             {
