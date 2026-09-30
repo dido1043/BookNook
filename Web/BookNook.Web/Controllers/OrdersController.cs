@@ -1,10 +1,8 @@
-using BookNook.Data;
 using BookNook.Data.Models;
 using BookNook.Services.Data.Service;
 using BookNook.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace BookNook.Web.Controllers
@@ -13,12 +11,14 @@ namespace BookNook.Web.Controllers
     public class OrdersController : Controller
     {
         private readonly OrderService _orderService;
-        private readonly BookNookContext _context;
+        private readonly BookService _bookService;
+        private readonly ClientService _clientService;
 
-        public OrdersController(OrderService orderService, BookNookContext context)
+        public OrdersController(OrderService orderService, BookService bookService, ClientService clientService)
         {
             _orderService = orderService;
-            _context = context;
+            _bookService = bookService;
+            _clientService = clientService;
         }
 
         public async Task<IActionResult> Index(string? clientSearch, OrderStatus? statusFilter, DateTime? startDate, DateTime? endDate)
@@ -29,9 +29,7 @@ namespace BookNook.Web.Controllers
             if (!isAdmin)
             {
                 int currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
-
                 orders = orders.Where(o => o.ClientId == currentUserId).ToList();
-
                 clientSearch = null;
             }
 
@@ -53,7 +51,7 @@ namespace BookNook.Web.Controllers
             var viewModel = new OrderFormViewModel
             {
                 Status = OrderStatus.New,
-                AvailableBooks = await _context.Books.Where(b => b.AvailableQuantity > 0).OrderBy(b => b.Title).ToListAsync()
+                AvailableBooks = await _bookService.GetFilteredBooksAsync(null, null, true)
             };
 
             bool isAdmin = User.IsInRole("Admin");
@@ -61,17 +59,21 @@ namespace BookNook.Web.Controllers
 
             if (isAdmin)
             {
-                viewModel.AvailableClients = await _context.Clients.OrderBy(c => c.Name).ToListAsync();
+                viewModel.AvailableClients = await _clientService.GetAllClientsAsync();
             }
             else
             {
-                viewModel.AvailableClients = await _context.Clients.Where(c => c.Id == currentUserId).ToListAsync();
+                var currentClient = await _clientService.GetByIdAsync(currentUserId);
+                if (currentClient != null)
+                {
+                    viewModel.AvailableClients = new List<Data.DTO.ClientDto> { currentClient };
+                }
                 viewModel.ClientId = currentUserId;
             }
 
             if (bookId.HasValue)
             {
-                var book = await _context.Books.FindAsync(bookId.Value);
+                var book = await _bookService.GetBookById(bookId.Value);
                 if (book != null && book.AvailableQuantity > 0)
                 {
                     viewModel.OrderLines.Add(new OrderLineViewModel
@@ -97,15 +99,16 @@ namespace BookNook.Web.Controllers
 
             if (isAdmin)
             {
-                viewModel.AvailableClients = await _context.Clients.OrderBy(c => c.Name).ToListAsync();
+                viewModel.AvailableClients = await _clientService.GetAllClientsAsync();
             }
             else
             {
                 viewModel.ClientId = currentUserId;
-                viewModel.AvailableClients = await _context.Clients.Where(c => c.Id == currentUserId).ToListAsync();
+                var currentClient = await _clientService.GetByIdAsync(currentUserId);
+                viewModel.AvailableClients = currentClient != null ? new List<Data.DTO.ClientDto> { currentClient } : new List<Data.DTO.ClientDto>();
             }
 
-            viewModel.AvailableBooks = await _context.Books.Where(b => b.AvailableQuantity > 0).OrderBy(b => b.Title).ToListAsync();
+            viewModel.AvailableBooks = await _bookService.GetFilteredBooksAsync(null, null, true);
 
             if (!ModelState.IsValid)
             {
