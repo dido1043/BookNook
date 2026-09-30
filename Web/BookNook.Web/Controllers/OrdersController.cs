@@ -132,7 +132,7 @@ namespace BookNook.Web.Controllers
                 return View(viewModel);
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]

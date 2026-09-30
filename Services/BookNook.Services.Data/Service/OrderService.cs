@@ -68,6 +68,8 @@ public class OrderService
                 UnitPrice = book.Price
             });
 
+            book.AvailableQuantity -= input.Quantity;
+
             itemsTotal += book.Price * input.Quantity;
         }
 
@@ -86,7 +88,7 @@ public class OrderService
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
 
-        return "Added order successfully!";
+        return null;
     }
 
     public async Task<string?> UpdateStatusAsync(int id, OrderStatus newStatus)
@@ -113,19 +115,9 @@ public class OrderService
         var oldStatus = order.Status;
         order.Status = newStatus;
 
-        foreach (var line in order.OrderLines)
+        if (newStatus == OrderStatus.Rejected && oldStatus != OrderStatus.Rejected)
         {
-            if (newStatus == OrderStatus.Confirmed && oldStatus != OrderStatus.Confirmed)
-            {
-                if (line.Book.AvailableQuantity < line.Quantity)
-                {
-                    order.Status = oldStatus;
-                    return $"Insufficient stock for '{line.Book.Title}'. Cannot confirm.";
-                }
-                line.Book.AvailableQuantity -= line.Quantity;
-            }
-            else if (oldStatus == OrderStatus.Confirmed &&
-                     (newStatus == OrderStatus.Rejected || newStatus == OrderStatus.New))
+            foreach (var line in order.OrderLines)
             {
                 line.Book.AvailableQuantity += line.Quantity;
             }
