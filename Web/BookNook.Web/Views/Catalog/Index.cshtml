@@ -5,7 +5,6 @@
 
 <h2 class="mb-4 text-uppercase">>> Book_Catalog</h2>
 
-<!-- Retro Search Console -->
 <form method="get" class="row g-3 mb-5 p-4 card">
     <div class="col-md-4">
         <input type="text" name="searchQuery" value="@Model.SearchQuery" class="form-control" placeholder="SEARCH TITLE OR AUTHOR..." />
@@ -71,13 +70,20 @@ else
                         }
                     </div>
                     <div class="card-footer border-0 pt-0 pb-3 px-3">
-                        @if (book.AvailableQuantity > 0)
+                        @if (User.Identity!.IsAuthenticated)
                         {
-                            <a asp-controller="Orders" asp-action="Create" asp-route-bookId="@book.Id" class="btn w-100">ADD TO ORDER</a>
+                            @if (book.AvailableQuantity > 0)
+                            {
+                                <a asp-controller="Orders" asp-action="Create" asp-route-bookId="@book.Id" class="btn w-100">ADD TO ORDER</a>
+                            }
+                            else
+                            {
+                                <button class="btn w-100" style="color: #666 !important; border-color: #333 !important;" disabled>LOCKED</button>
+                            }
                         }
                         else
                         {
-                            <button class="btn w-100" style="color: #666 !important; border-color: #333 !important;" disabled>LOCKED</button>
+                            <button class="btn w-100" style="color: #666 !important; border-color: #333 !important;" disabled>LOGIN TO ORDER</button>
                         }
                     </div>
                 </div>

@@ -26,6 +26,7 @@ builder.Services.AddScoped<BookService>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<OrderLineService>();
 builder.Services.AddScoped<ReportService>();
+builder.Services.AddScoped<ClientService>();
 
 builder.Services.AddIdentity<Client, IdentityRole<int>>(o =>
     {
@@ -33,6 +34,12 @@ builder.Services.AddIdentity<Client, IdentityRole<int>>(o =>
     })
     .AddEntityFrameworkStores<BookNookContext>()
     .AddDefaultTokenProviders();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Identity/Account/Login";
+
+    options.AccessDeniedPath = "/Home/AccessDenied";
+});
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

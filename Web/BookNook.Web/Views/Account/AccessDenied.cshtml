@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="container mt-5">
+    <div class="card p-5 text-center col-md-8 mx-auto" style="border-color: #ff3333;">
+        <h1 class="text-uppercase mb-3" style="color: #ff3333;">[!] SECURITY_BREACH_DETECTED</h1>
+        <p class="lead mb-4 text-uppercase" style="color: #aaa;">
+            Access Denied. You do not possess the required security clearance (ADMIN_ROLE) to view this system resource.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-controller="Home" asp-action="Index" class="btn">> RETURN_TO_HOME</a>
+            <a asp-controller="Catalog" asp-action="Index" class="btn">> VIEW_CATALOG</a>
+        </div>
+    </div>
+</div>

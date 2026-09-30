@@ -95,3 +95,23 @@ body {
     --bs-table-bg-state: #111;
     color: #fff;
 }
+
+.form-control:focus, .form-select:focus {
+    background-color: #111 !important;
+    color: #39FF14 !important;
+    border-color: #39FF14 !important;
+    box-shadow: 0 0 8px rgba(57, 255, 20, 0.4) !important;
+}
+
+\.form-floating > label {
+    color: #888 !important;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: #39FF14 !important;
+}
+
+.form-floating > label::after {
+    background-color: #111 !important;
+}
