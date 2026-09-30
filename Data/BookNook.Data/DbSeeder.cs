@@ -46,6 +46,34 @@ namespace BookNook.Data
                 await userManager.AddToRoleAsync(client, ClientRole);
             }
 
+            var client2 = new Client
+            {
+                Name = "Maria Petrova",
+                Phone = "0899123123",
+                Email = "maria@example.com",
+                UserName = "maria@example.com",
+                DeliveryAddress = "Sofia, bul. Vitosha 42"
+            };
+            var createResult2 = await userManager.CreateAsync(client2, "Password123!");
+            if (createResult2.Succeeded)
+            {
+                await userManager.AddToRoleAsync(client2, ClientRole);
+            }
+
+            var client3 = new Client
+            {
+                Name = "Georgi Georgiev",
+                Phone = "0877987654",
+                Email = "georgi@example.com",
+                UserName = "georgi@example.com",
+                DeliveryAddress = null
+            };
+            var createResult3 = await userManager.CreateAsync(client3, "Password123!");
+            if (createResult3.Succeeded)
+            {
+                await userManager.AddToRoleAsync(client3, ClientRole);
+            }
+
             var order = new Order
             {
                 ClientId = client.Id,
@@ -63,6 +91,46 @@ namespace BookNook.Data
                 new OrderLine { OrderId = order.Id, BookId = books[3].Id, Quantity = 1, UnitPrice = 20.00m }
             };
             context.OrderLines.AddRange(orderLines);
+            context.SaveChanges();
+
+            var order2 = new Order
+            {
+                ClientId = client2.Id,
+                OrderDate = DateTime.Now.AddDays(-5),
+                Status = OrderStatus.Confirmed,
+                DeliveryMethod = DeliveryMethod.InStore,
+                TotalSum = 40.00m
+            };
+            var order3 = new Order
+            {
+                ClientId = client3.Id,
+                OrderDate = DateTime.Now.AddDays(-10),
+                Status = OrderStatus.Fulfilled,
+                DeliveryMethod = DeliveryMethod.Delivery,
+                TotalSum = 45.50m
+            };
+            var order4 = new Order
+            {
+                ClientId = client.Id,
+                OrderDate = DateTime.Now.AddDays(-1),
+                Status = OrderStatus.Rejected,
+                DeliveryMethod = DeliveryMethod.Delivery,
+                TotalSum = 25.00m
+            };
+
+            context.Orders.AddRange(order2, order3, order4);
+            context.SaveChanges();
+
+            var extraOrderLines = new List<OrderLine>
+            {
+                new OrderLine { OrderId = order2.Id, BookId = books[1].Id, Quantity = 1, UnitPrice = 40.00m },
+                
+                new OrderLine { OrderId = order3.Id, BookId = books[4].Id, Quantity = 1, UnitPrice = 15.50m },
+                new OrderLine { OrderId = order3.Id, BookId = books[2].Id, Quantity = 1, UnitPrice = 25.00m },
+                
+                new OrderLine { OrderId = order4.Id, BookId = books[3].Id, Quantity = 1, UnitPrice = 20.00m }
+            };
+            context.OrderLines.AddRange(extraOrderLines);
             context.SaveChanges();
         }
 
