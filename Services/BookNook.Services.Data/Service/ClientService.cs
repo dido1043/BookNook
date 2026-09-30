@@ -17,5 +17,5 @@ public class ClientService
         return client;
     }
 
-   
+    public Task<IEnumerable<ClientDto>> GetAllClientsAsync() => _clientRepository.GetAllClientsAsync();
 }

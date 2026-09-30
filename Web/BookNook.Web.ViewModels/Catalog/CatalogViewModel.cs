@@ -1,10 +1,10 @@
-﻿using BookNook.Data.Models;
+﻿using BookNook.Data.DTO;
 
 namespace BookNook.Web.Models
 {
     public class CatalogViewModel
     {
-        public IEnumerable<Book> Books { get; set; } = new List<Book>();
+        public IEnumerable<BookDto> Books { get; set; } = new List<BookDto>();
         public string? SearchQuery { get; set; }
         public string? GenreFilter { get; set; }
         public bool InStockOnly { get; set; }

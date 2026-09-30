@@ -33,6 +33,31 @@ public class BookRepository : IBookRepository
         return  Task.FromResult<IEnumerable<BookDto>>(books);
     }
 
+    public async Task<IEnumerable<BookDto>> GetFilteredBooksAsync(string? searchQuery, string? genreFilter, bool inStockOnly)
+    {
+        var query = _context.Books.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var searchLower = searchQuery.ToLower();
+            query = query.Where(b => b.Title.ToLower().Contains(searchLower) || b.Author.ToLower().Contains(searchLower));
+        }
+
+        if (!string.IsNullOrWhiteSpace(genreFilter))
+            query = query.Where(b => b.Genre == genreFilter);
+
+        if (inStockOnly)
+            query = query.Where(b => b.AvailableQuantity > 0);
+
+        var books = await query.ToListAsync();
+        return _bookMapper.ToBookDtoList(books);
+    }
+
+    public async Task<IEnumerable<string>> GetAllGenresAsync()
+    {
+        return await _context.Books.Select(b => b.Genre).Distinct().ToListAsync();
+    }
+
     public async Task<BookDto> AddBook(BookDto book)                                                                                                                                                                                      
     {                                                                                                                                                                                                                                      
         var entity = _bookMapper.DtoToBook(book);                                                                                                                                                                                          

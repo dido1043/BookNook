@@ -6,6 +6,7 @@ namespace BookNook.Data.Repository.Interface;
 public interface IClientRepository
 {
     Task<ClientDto?> GetByIdAsync(int id);
+    Task<IEnumerable<ClientDto>> GetAllClientsAsync();
     void Update(ClientDto book);
     void Delete(ClientDto book);
     Task SaveAsync();

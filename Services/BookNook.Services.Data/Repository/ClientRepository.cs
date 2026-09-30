@@ -3,9 +3,10 @@ using BookNook.Services.Data.Mapper;
 
 namespace BookNook.Services.Data.Repository;
 using BookNook.Data;
-using BookNook.Data.Repository.Interface;
 using BookNook.Data.Models;
+using BookNook.Data.Repository.Interface;
 using BookNook.Services.Data.Mapper;
+using Microsoft.EntityFrameworkCore;
 
 public class ClientRepository : IClientRepository
 {
@@ -22,7 +23,13 @@ public class ClientRepository : IClientRepository
         return _clientMapper.ClientToDto(await _context.Users.FindAsync(id));
     }
 
-  
+    public async Task<IEnumerable<ClientDto>> GetAllClientsAsync()
+    {
+        var clients = await _context.Users.AsNoTracking().OrderBy(c => c.Name).ToListAsync();
+        return clients.Select(c => _clientMapper.ClientToDto(c)).ToList();
+    }
+
+
     public void Update(ClientDto client)
     {
         _context.Users.Update(_clientMapper.DtoToModel(client));

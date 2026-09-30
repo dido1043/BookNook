@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using BookNook.Data.Models;
+using BookNook.Data.DTO;
 
 namespace BookNook.Web.Models
 {
@@ -20,8 +21,8 @@ namespace BookNook.Web.Models
 
         public List<OrderLineViewModel> OrderLines { get; set; } = new List<OrderLineViewModel>();
 
-        public IEnumerable<Client> AvailableClients { get; set; } = new List<Client>();
-        public IEnumerable<Book> AvailableBooks { get; set; } = new List<Book>();
+        public IEnumerable<ClientDto> AvailableClients { get; set; } = new List<ClientDto>();
+        public IEnumerable<BookDto> AvailableBooks { get; set; } = new List<BookDto>();
     }
 
     public class OrderLineViewModel

@@ -18,6 +18,11 @@ public class BookService
         return await _bookRepository.GetByIdAsync(id);
     }
 
+    public Task<IEnumerable<BookDto>> GetFilteredBooksAsync(string? searchQuery, string? genreFilter, bool inStockOnly) =>
+        _bookRepository.GetFilteredBooksAsync(searchQuery, genreFilter, inStockOnly);
+
+    public Task<IEnumerable<string>> GetAllGenresAsync() => _bookRepository.GetAllGenresAsync();
+
     public async Task<IEnumerable<BookDto>> AllBooks()
     {
         return await _bookRepository.GetAllBooksAsync();
