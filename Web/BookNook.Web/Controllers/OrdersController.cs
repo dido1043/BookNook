@@ -135,6 +135,25 @@ namespace BookNook.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var order = await _orderService.GetByIdAsync(id.Value);
+            if (order == null) return NotFound();
+
+            bool isAdmin = User.IsInRole("Admin");
+            int currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+
+            if (!isAdmin && order.ClientId != currentUserId)
+            {
+                return RedirectToAction("AccessDenied", "Home");
+            }
+
+            return View(order);
+        }
+
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {

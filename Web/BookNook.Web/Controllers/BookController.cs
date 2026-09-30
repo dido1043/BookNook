@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BookNook.Controllers;
 
+[Authorize(Roles = "Admin")]
 public class BookController : Controller
 {
     private readonly BookService _bookService;

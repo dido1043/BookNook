@@ -1,0 +1,62 @@
+﻿@model BookNook.Data.DTO.OrderDto
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0 text-uppercase">>> Order_Data [#@Model.Id]</h2>
+    <a asp-action="Index" class="btn">> RETURN_TO_LIST</a>
+</div>
+
+<div class="card p-4 mb-4">
+    <div class="row">
+        <div class="col-md-6">
+            <p class="mb-1 text-uppercase" style="color: #aaa;">> Client_Name</p>
+            <h5 style="color: #39FF14;">@Model.ClientName</h5>
+            
+            <p class="mb-1 mt-3 text-uppercase" style="color: #aaa;">> Timestamp</p>
+            <h5 style="color: #39FF14;">@Model.OrderDate.ToString("yyyy-MM-dd HH:mm")</h5>
+        </div>
+        <div class="col-md-6">
+            <p class="mb-1 text-uppercase" style="color: #aaa;">> Status</p>
+            <h5 style="color: #39FF14;">@Model.Status.ToString().ToUpper()</h5>
+            
+            <p class="mb-1 mt-3 text-uppercase" style="color: #aaa;">> Delivery_Routing</p>
+            <h5 style="color: #39FF14;">@Model.DeliveryMethod.ToString().ToUpper()</h5>
+        </div>
+    </div>
+</div>
+
+<div class="card p-0">
+    <div class="table-responsive">
+        <table class="table table-dark mb-0">
+            <thead>
+                <tr style="border-bottom: 2px solid #39FF14;">
+                    <th>BOOK</th>
+                    <th>AUTHOR</th>
+                    <th class="text-center">QTY</th>
+                    <th class="text-end">PRICE</th>
+                    <th class="text-end">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var line in Model.OrderLines)
+                {
+                    <tr style="border-bottom: 1px solid #222;">
+                        <td>@line.BookTitle</td>
+                        <td style="color: #666;">@line.BookAuthor</td>
+                        <td class="text-center">@line.Quantity</td>
+                        <td class="text-end" style="color: #aaa;">€@line.UnitPrice.ToString("F2")</td>
+                        <td class="text-end" style="color: #39FF14;">€@((line.Quantity * line.UnitPrice).ToString("F2"))</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-end fw-bold pt-4 text-uppercase">> Final_Calculated_Sum:</td>
+                    <td class="text-end fw-bold pt-4 fs-4" style="color: #39FF14;">€@Model.TotalSum.ToString("F2")</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
